@@ -9,7 +9,8 @@ export type EngineCommandType =
   | "get_public_trades"
   | "get_my_trades"
   | "get_klines"
-  | "get_markets";
+  | "get_markets"
+  | "faucet";
 
 export interface EngineRequest {
   correlationId: string;

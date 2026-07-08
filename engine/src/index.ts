@@ -46,6 +46,8 @@ import {
   processGetKlines,
 } from "./query-pipeline.js";
 
+import { processFaucet } from "./wallet/wallet-service.js";
+
 // ─── Command Dispatcher ──────────────────────────────────────────────────────
 
 /**
@@ -87,6 +89,9 @@ function handleEngineRequest(message: EngineRequest): unknown {
 
     case "get_klines":
       return processGetKlines(message.payload);
+
+    case "faucet":
+      return processFaucet(message.payload);
 
     default: {
       const exhaustiveCheck: never = message.type;
