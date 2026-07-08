@@ -31,6 +31,7 @@ export interface OrderRecord {
   filledQty: number;
   status: OrderStatus;
   fills: Fill[];
+  averagePrice: number | null;
   createdAt: number;
 }
 
@@ -78,3 +79,17 @@ export const BALANCES = new Map<string, Record<string, Balance>>();
 export const ORDERBOOKS = new Map<string, OrderBook>();
 export const ORDERS = new Map<string, OrderRecord>();
 export const FILLS: Fill[] = [];
+
+export interface Trade {
+  tradeId: string;
+  symbol: string;
+  buyerOrderId: string;
+  sellerOrderId: string;
+  buyerUserId: string;
+  sellerUserId: string;
+  price: number;
+  qty: number;
+  createdAt: number;
+}
+
+export const TRADES: Trade[] = [];

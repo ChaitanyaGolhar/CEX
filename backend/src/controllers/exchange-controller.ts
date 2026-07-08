@@ -33,9 +33,12 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     qty,
   });
 
-  res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {
-    error: engineResponse.error,
-  });
+  if (engineResponse.ok) {
+    const data = engineResponse.data as { order: any };
+    res.status(200).json(data.order);
+  } else {
+    res.status(400).json({ error: engineResponse.error });
+  }
 }
 
 export async function getDepth(req: Request, res: Response): Promise<void> {
@@ -48,6 +51,20 @@ export async function getDepth(req: Request, res: Response): Promise<void> {
   const { symbol } = parsedParams.data;
   const engineResponse = await sendToEngine("get_depth", { symbol });
   res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {
+    error: engineResponse.error,
+  });
+}
+
+export async function getTicker(req: Request, res: Response): Promise<void> {
+  const parsedParams = symbolParamSchema.safeParse(req.params);
+  if (!parsedParams.success) {
+    sendValidationError(res, parsedParams.error);
+    return;
+  }
+
+  const { symbol } = parsedParams.data;
+  const engineResponse = await sendToEngine("get_ticker", { symbol });
+  res.status(engineResponse.ok ? 200 : 404).json(engineResponse.ok ? engineResponse.data : {
     error: engineResponse.error,
   });
 }
@@ -91,6 +108,74 @@ export async function cancelOrder(req: Request, res: Response): Promise<void> {
   const engineResponse = await sendToEngine("cancel_order", {
     userId: getUserId(req),
     orderId,
+  });
+
+  res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {
+    error: engineResponse.error,
+  });
+}
+
+export async function listOrders(req: Request, res: Response): Promise<void> {
+  const engineResponse = await sendToEngine("list_orders", {
+    userId: getUserId(req),
+    status: req.query.status,
+    symbol: req.query.symbol,
+    cursor: req.query.cursor,
+    limit: req.query.limit,
+  });
+
+  res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {
+    error: engineResponse.error,
+  });
+}
+
+export async function getPublicTrades(req: Request, res: Response): Promise<void> {
+  const parsedParams = symbolParamSchema.safeParse(req.params);
+  if (!parsedParams.success) {
+    sendValidationError(res, parsedParams.error);
+    return;
+  }
+
+  const { symbol } = parsedParams.data;
+  const engineResponse = await sendToEngine("get_public_trades", { symbol });
+
+  res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {
+    error: engineResponse.error,
+  });
+}
+
+export async function getMyTrades(req: Request, res: Response): Promise<void> {
+  const engineResponse = await sendToEngine("get_my_trades", {
+    userId: getUserId(req),
+    symbol: req.query.symbol,
+    cursor: req.query.cursor,
+    limit: req.query.limit,
+  });
+
+  res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {
+    error: engineResponse.error,
+  });
+}
+
+export async function getMarkets(req: Request, res: Response): Promise<void> {
+  const engineResponse = await sendToEngine("get_markets", {});
+  res.status(engineResponse.ok ? 200 : 500).json(engineResponse.ok ? engineResponse.data : {
+    error: engineResponse.error,
+  });
+}
+
+export async function getKlines(req: Request, res: Response): Promise<void> {
+  const parsedParams = symbolParamSchema.safeParse(req.params);
+  if (!parsedParams.success) {
+    sendValidationError(res, parsedParams.error);
+    return;
+  }
+
+  const { symbol } = parsedParams.data;
+  const engineResponse = await sendToEngine("get_klines", { 
+    symbol,
+    interval: req.query.interval,
+    limit: req.query.limit,
   });
 
   res.status(engineResponse.ok ? 200 : 400).json(engineResponse.ok ? engineResponse.data : {

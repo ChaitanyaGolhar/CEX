@@ -26,6 +26,7 @@ export async function signup(req: Request, res: Response): Promise<void> {
     res.status(201).json({
       userId: user.id,
       username: user.username,
+      token: createToken({ userId: user.id }),
     });
   } catch {
     res.status(409).json({ error: "username already exists" });
